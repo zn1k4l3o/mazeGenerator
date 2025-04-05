@@ -1,6 +1,62 @@
 import numpy as np
 from PIL import Image, ImageFile
 
+'''
+__XXXXX_____
+__XXXXX_____
+__XXXXXX____
+__XXXXXX____
+__XXXXXXX_XX
+_XXXXXXXX_XX
+XXXXXXXXXXXX
+XXXXXXXXXXX_
+XXXXXXXXXX__
+_XXXXXXXXXX_
+_XXXXXXXX_X_
+_XX__X_XXX__
+
+
+____OXOXOXOXOXO__________
+____OXOXOXOXOXO__________
+____OXOXOXOXOXOXO________
+____OXOXOXOXOXOXO________
+____OXOXOXOXOXOXOXO_OXOXO
+__OXOXOXOXOXOXOXOXO_OXOXO
+OXOXOXOXOXOXOXOXOXOXOXOXO
+OXOXOXOXOXOXOXOXOXOXOXO__
+OXOXOXOXOXOXOXOXOXOXO____
+__OXOXOXOXOXOXOXOXOXOXO__
+__OXOXOXOXOXOXOXOXO_OXO__
+__OXOXO___OXO_OXOXOXO____
+
+
+____OOOOOOOOOOO__________
+____OXOXOXOXOXO__________
+____OOOOOOOOOOO__________
+____OXOXOXOXOXO__________
+____OOOOOOOOOOOOO________
+____OXOXOXOXOXOXO________
+____OOOOOOOOOOOOO________
+____OXOXOXOXOXOXO________
+____OOOOOOOOOOOOOOO_OOOOO
+____OXOXOXOXOXOXOXO_OXOXO
+__OOOOOOOOOOOOOOOOO_OOOOO
+__OXOXOXOXOXOXOXOXO_OXOXO
+OOOOOOOOOOOOOOOOOOOOOOOOO
+OXOXOXOXOXOXOXOXOXOXOXOXO
+OOOOOOOOOOOOOOOOOOOOOOOOO
+OXOXOXOXOXOXOXOXOXOXOXO__
+OOOOOOOOOOOOOOOOOOOOOOO__
+OXOXOXOXOXOXOXOXOXOXO____
+OOOOOOOOOOOOOOOOOOOOOOO__
+__OXOXOXOXOXOXOXOXOXOXO__
+__OOOOOOOOOOOOOOOOOOOOO__
+__OXOXOXOXOXOXOXOXO_OXO__
+__OOOOOOOOOOOOOOOOOOOOO__
+__OXOXO___OXO_OXOXOXO____
+__OOOOO___OOO_OOOOOOO____
+'''
+
 def crop_fixed_border(img, border=20):
     height, width = img.shape
 
@@ -31,7 +87,7 @@ def fill_middle(img):
     imageData = np.array(img, dtype=np.uint8)
     #imageData = img
     newImage = Image.fromarray(imageData)
-    newImage.show()
+    #newImage.show()
     height, width = imageData.shape
     print(width, height)
     pointsToVisit = [(0,0)]
@@ -52,6 +108,19 @@ def fill_middle(img):
                 imageData[i, j] = 0
     return imageData
 
+def allocate_wall_space(imageData):
+    dirrs = [(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1),(0,-1),(1,-1)]
+    height, width = imageData.shape
+    print(imageData.shape)
+    newData = np.zeros((height*2+1,width*2+1), dtype="uint8")
+    for iy in range(height):
+        for ix in range(width):
+            if (imageData[iy, ix] > 0):
+                newData[iy*2+1, ix*2+1] = 69
+                for addY, addX in dirrs:
+                    newData[(iy*2+1)+addY, (ix*2+1)+addX] = 69
+    return newData
+
 def getShapeFromImage(image: ImageFile):
     graf = np.zeros((101, 101), dtype=np.bool_)
     thresh = 245
@@ -68,30 +137,35 @@ def getShapeFromImage(image: ImageFile):
     croppedImageData = crop_fixed_border(imageData, border=20)
     filledImageData = fill_middle(croppedImageData)
     finalCroppedImage = crop_white_space(filledImageData)
-    finalCroppedImage.show()
-    multiplier = 0.07       #how big is the target maze
+    #finalCroppedImage.show()
+    multiplier = 0.03      #how big is the target maze
     #multiplier = 0.005  #test
     newWidth = (int) (finalCroppedImage.width*multiplier)
     newHeight= (int) (finalCroppedImage.height*multiplier)
     print(newHeight,newWidth)
     smallerImage = finalCroppedImage.resize((newWidth, newHeight))
-    smallerImage.show()
+    #smallerImage.show()
 
     graf = np.bitwise_not(np.array(smallerImage, dtype="uint8"))
-
-    graf3X = np.repeat(np.repeat(graf, 3, axis=0), 3, axis=1)
     
+    graf2X1 = allocate_wall_space(graf)
+
     print("mali")
     for line in graf:
         out = ''
         for tile in line:
             out += "X" if tile else '_'
         print(out)
-    print("trostruki")
-    for line in graf3X:
+    print("dvostruki")
+    for line in graf2X1:
         out = ''
         for tile in line:
-            out += "X" if tile else '_'
+            if (tile == 69):
+                out += "X"
+            elif (tile == 1):
+                out += "#"
+            else:
+                out += ' '
         print(out)
     
-    return graf3X
+    return (graf, graf2X1)

@@ -121,7 +121,7 @@ def allocate_wall_space(imageData):
                     newData[(iy*2+1)+addY, (ix*2+1)+addX] = 69
     return newData
 
-def getShapeFromImage(image: ImageFile):
+def getShapeFromImage(image: ImageFile, multiplier = 0.03):
     graf = np.zeros((101, 101), dtype=np.bool_)
     thresh = 245
     allWhite =  Image.new("RGBA", image.size, "WHITE")
@@ -138,7 +138,7 @@ def getShapeFromImage(image: ImageFile):
     filledImageData = fill_middle(croppedImageData)
     finalCroppedImage = crop_white_space(filledImageData)
     #finalCroppedImage.show()
-    multiplier = 0.03      #how big is the target maze
+    #multiplier = 0.03      #how big is the target maze
     #multiplier = 0.005  #test
     newWidth = (int) (finalCroppedImage.width*multiplier)
     newHeight= (int) (finalCroppedImage.height*multiplier)

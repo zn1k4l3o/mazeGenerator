@@ -55,43 +55,21 @@ def createMaze(graf2x1, dfsStart, seed = 1):
 
     return pathMaze
 
-def findStartEnd(maze, startValue, endValue):
-    seMaze = np.array(maze)
-
+def checkIsPathWall(tempPoint, wallLocations, maze):
+    return (tempPoint not in wallLocations 
+                and isWithinBorders(tempPoint, maze.shape) 
+                and numOfBorders(tempPoint, maze) == 1)
 
 def getBorderWalls(maze):
     mazeWidth = maze.shape[1]
-    tempMaze = np.array(maze)
-    tempMaze[tempMaze > 0] = 1
-    '''
-    firstWallY = 0
-    while maze[firstWallY, int(mazeWidth/2) + 1] == NONE:
-        firstWallY += 1
-    print(firstWallY)
-    startPoint = (firstWallY, int(mazeWidth/2) + 1)
-    '''
-
-    height, width = maze.shape
     wallLocations = []
-
-    '''
-    wallLocations = []
-    for y in range(height):
-        for x in range(width):
-            if (isBorder((y, x), maze) == 1):
-                tempMaze[y, x] = 2
-                wallLocations.append((y, x))
-    '''
-
-    firstWallY = 0
-    while maze[firstWallY, int(mazeWidth/2) + 1] == NONE:
-        firstWallY += 1
-    print("firstwallY: ",firstWallY)
     addX = 0
-    if (mazeWidth % 2 == 0):
+    if (int((mazeWidth - 1) / 2) % 2 == 0):
         addX = 1
+    firstWallY = 0
+    while maze[firstWallY, int(mazeWidth/2) + addX] == NONE:
+        firstWallY += 1
     startPoint = (firstWallY, int(mazeWidth/2) + addX)
-    print("start",startPoint)
     currentPoint = startPoint
     wallLocations.append(startPoint)
     
@@ -100,10 +78,8 @@ def getBorderWalls(maze):
         for add in dirrs2X:
             tempPoint = (currentPoint[0] + add[0], currentPoint[1] + add[1])
             midPoint = (currentPoint[0] + int(add[0]/2), currentPoint[1] + int(add[1]/2))
-            if (tempPoint not in wallLocations 
-                and isWithinBorders(tempPoint, maze.shape) 
-                and numOfBorders(tempPoint, maze) == 1 
-                and maze[midPoint] != NONE):
+            if (checkIsPathWall(tempPoint, wallLocations, maze)
+                and maze[midPoint[0], midPoint[1]] == WALL):
                 currentPoint = tempPoint
                 wallLocations.append(tempPoint)
                 pointAdded = True
@@ -111,30 +87,13 @@ def getBorderWalls(maze):
         if (not pointAdded):
             for add in dirrDiag:
                 tempPoint = (currentPoint[0] + add[0], currentPoint[1] + add[1])
-                midPoint = (currentPoint[0] + int(add[0]/2), currentPoint[1] + int(add[1]/2))
-                if (tempPoint not in wallLocations 
-                    and isWithinBorders(tempPoint, maze.shape) 
-                    and numOfBorders(tempPoint, maze) == 1 
-                    and maze[midPoint] != NONE):
+                if (checkIsPathWall(tempPoint, wallLocations, maze)):
                     currentPoint = tempPoint
                     wallLocations.append(tempPoint)
                     pointAdded = True
                     break
         if (not pointAdded):
             break
-
-    '''
-    for line in tempMaze:
-        out = ''
-        for tile in line:
-            if (tile == 1):
-                out += '.'
-            elif (tile == 2):
-                out += 'X'
-            else:
-                out += ' '
-        print(out)
-    '''
 
     return wallLocations
 

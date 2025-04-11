@@ -4,7 +4,7 @@ from matrixTools.mazegen import createMaze, getBorderWalls
 
 def main():
     img = Image.open('mazeGenerator/test_images/10.jpg')
-    imageMatrix, mazeMatrix = getShapeFromImage(img, 0.05)
+    imageMatrix, mazeMatrix = getShapeFromImage(img, 0.04)
     print(imageMatrix.shape)
     addYX = [0,0]
     if (imageMatrix.shape[0] % 2 == 0):
@@ -15,12 +15,9 @@ def main():
     maze = createMaze(mazeMatrix, dfsStart)
     #ne intuitivno
     #dva slidera za start i end - 0-100%, 0-360
-    walls = getBorderWalls(mazeMatrix)
-    print(len(walls))
+    walls = getBorderWalls(maze)
     startValue = 0
     endValue = int(len(walls)/2)
-    #maze[walls[startValue][0]*2+1, walls[startValue][1]*2+1] = 1
-    #maze[walls[endValue][0]*2+1, walls[endValue][1]*2+1] = 2
 
     for i in range(len(maze)):
         line = maze[i]

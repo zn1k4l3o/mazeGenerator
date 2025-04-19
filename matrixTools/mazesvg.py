@@ -1,68 +1,63 @@
 import svg
 
 WALL = 69
+SOLUTION = 3
 
-def mazeToSVG(maze, unitSize):
+def mazeToSVG(maze, unitSize, strokeWidth=1, wallStrokeColor="#000000", solutionStrokeColor = "#ffffff"):
     size = maze.shape
     sizeTrue = (int((maze.shape[0]-1)/2),int((maze.shape[1]-1)/2))
     svgElements = []
-    for y in range(0,size[0], 2):
+    for y in range(0,size[0]):
+        tile = maze[y,0]
         lineLength = 0
         startX = 0
-        #print("novi red", y)
         for x in range(0,size[1]):
-            if (maze[y, x] == WALL):
-                if (lineLength == 0):
-                    startX = x
-                lineLength += 1
-            if ((maze[y, x] != WALL or x == size[1]-1) and lineLength > 0):
-                #print("x: " , x , "lineLength: " ,lineLength)
-                if (lineLength > 1):
-                    #startX = x - lineLength
-                    #lineLength = int((lineLength-1)/2)
-                    realY = int(y/2)*unitSize
-                    realX = int(x/2)*unitSize
-                    realStartX = int(startX/2)*unitSize
-                    #print("sx: {0}, ex: {1}, sy: {2}, ey: {3}".format(realStartX, realX, realY, realY))
+            if ((maze[y, x] != tile or x == size[1]-1) and lineLength > 0):
+                if (lineLength > 1 and tile in [WALL, SOLUTION]):
+                    realY = int(y/2)*unitSize+strokeWidth + (unitSize/2 if tile == SOLUTION else 0)
+                    realX = int(x/2)*unitSize+strokeWidth - (unitSize/2 if tile == SOLUTION else 0)
+                    realStartX = int(startX/2)*unitSize+strokeWidth + (unitSize/2 if tile == SOLUTION else 0)
                     svgElements.append(svg.Line(x1=realStartX,
                                                 y1=realY,
                                                 x2=realX, 
                                                 y2=realY, 
-                                                stroke="red", 
-                                                stroke_width=2))
+                                                stroke= (solutionStrokeColor if tile == SOLUTION else wallStrokeColor), 
+                                                stroke_width=strokeWidth,
+                                                stroke_linecap="round"))
+                if (maze[y, x] in [WALL, SOLUTION]):
+                    startX = x
                 lineLength = 0
-    print()
-    print()
-    #print("Druga strana")
+                tile = maze[y, x]
+            if (maze[y, x] == tile):
+                lineLength += 1
     
     for x in range(0,size[1]):
+        tile = maze[0,x]
         lineLength = 0
         startY = 0
-        #print("novi red", x)
         for y in range(0,size[0]):
-            if (maze[y, x] == WALL):
-                if (lineLength == 0):
-                    startY = y
-                lineLength += 1
-            if ((maze[y, x] != WALL or y == size[0]-1) and lineLength > 0):
-                #print("y: " , y , "lineLength: " , lineLength)
-                if (lineLength > 1):
-                    realY = int(y/2)*unitSize
-                    realX = int(x/2)*unitSize
-                    realStartY = int((startY)/2)*unitSize
+            if ((maze[y, x] != tile or y == size[0]-1) and lineLength > 0):
+                if (lineLength > 1 and tile in [WALL, SOLUTION]):
+                    realY = int(y/2)*unitSize+strokeWidth - (unitSize/2 if tile == SOLUTION else 0)
+                    realX = int(x/2)*unitSize+strokeWidth + (unitSize/2 if tile == SOLUTION else 0)
+                    realStartY = int(startY/2)*unitSize+strokeWidth + (unitSize/2 if tile == SOLUTION else 0)
                     svgElements.append(svg.Line(x1=realX,
                                                 y1=realStartY,
                                                 x2=realX, 
                                                 y2=realY, 
-                                                stroke="red", 
-                                                stroke_width=2))
+                                                stroke=(solutionStrokeColor if tile == SOLUTION else wallStrokeColor), 
+                                                stroke_width=strokeWidth,
+                                                stroke_linecap="round"))
+                if (maze[y, x] in [WALL, SOLUTION]):
+                    startY = y
                 lineLength = 0
+                tile = maze[y, x]
+            if (maze[y, x] == tile):
+                lineLength += 1
     
-    #ispraviti velicine
     canvas = svg.SVG(
-    width=unitSize*sizeTrue[1],
-    height=unitSize*sizeTrue[0],
+    width=unitSize*sizeTrue[1]+strokeWidth*2,
+    height=unitSize*sizeTrue[0]+strokeWidth*2,
     elements=svgElements
 )
-    #print(canvas)
     return canvas

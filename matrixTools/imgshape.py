@@ -121,16 +121,15 @@ def allocate_wall_space(imageData):
                     newData[(iy*2+1)+addY, (ix*2+1)+addX] = 69
     return newData
 
-def getShapeFromImage(image: ImageFile, multiplier = 0.03):
+def getShapeFromImage(image: ImageFile, multiplier = 0.03, threshold = 245):
     graf = np.zeros((101, 101), dtype=np.bool_)
-    thresh = 245
     allWhite =  Image.new("RGBA", image.size, "WHITE")
     if (image.format == 'PNG'):
         allWhite.paste(image, (0,0), image)
     else:
         allWhite = image
 
-    fn = lambda x: 255 if x > thresh else 0
+    fn = lambda x: 255 if x > threshold else 0
     convertedImage = allWhite.convert('L').point(fn, mode='L')
     imageData = np.asarray(convertedImage, dtype=np.uint8)
 
@@ -150,6 +149,7 @@ def getShapeFromImage(image: ImageFile, multiplier = 0.03):
     
     graf2X1 = allocate_wall_space(graf)
 
+    '''
     print("mali")
     for line in graf:
         out = ''
@@ -167,5 +167,6 @@ def getShapeFromImage(image: ImageFile, multiplier = 0.03):
             else:
                 out += ' '
         print(out)
+    '''
     
     return (graf, graf2X1)

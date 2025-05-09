@@ -1,0 +1,84 @@
+<html>
+  <head>
+    <title>Mazeify</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.scss') }}"
+    />
+  </head>
+  <body>
+    <main>
+      <h1>Image to maze transform</h1>
+      <form enctype="multipart/form-data" id="imageForm">
+        <input
+          type="file"
+          name="image"
+          id="image"
+          accept="image/png, image/jpeg"
+        />
+        <br />
+        <label for="startIndex">Maze start (%):</label>
+        <input type="range" name="startIndex" min="0" max="100" />
+        <br />
+        <label for="endIndex">Maze end (%):</label>
+        <input type="range" name="endIndex" min="0" max="100" />
+        <br />
+        <label for="sizePercent">Size (%):</label>
+        <input type="range" name="sizePercent" min="1" max="100" />
+        <br />
+        <label for="cellSize">Cell size:</label>
+        <input type="range" name="cellSize" min="1" max="30" />
+        <br />
+        <label for="wallSize">Wall size:</label>
+        <input type="range" name="wallSize" min="1" max="10" />
+        <br />
+        <input type="submit" value="Submit" />
+        <br />
+        <h2>Uploaded Image:</h2>
+        <section class="result">
+          <img
+            src=""
+            alt="Uploaded Image"
+            class="targetImage"
+            id="targetImage"
+          />
+          <div src="" alt="Maze" class="mazeContainer" id="mazeContainer"></div>
+          <div
+            src=""
+            alt="Solved Maze"
+            class="solvedmazeContainer"
+            id="solvedmazeContainer"
+          ></div>
+        </section>
+
+        <div>
+          <span id="loading"></span>
+        </div>
+        <br />
+      </form>
+    </main>
+  </body>
+  <script>
+    const form = document.querySelector(`#imageForm`);
+    let submitted = false;
+
+    async function handleSubmit(event) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      const imageInput = document.getElementById("image").files[0];
+      document.getElementById("targetImage").src =
+        URL.createObjectURL(imageInput);
+
+      const response = await fetch("/", { method: "POST", body: formData });
+
+      const svg = await response.json();
+
+      document.getElementById("mazeContainer").innerHTML = svg.maze;
+      document.getElementById("solvedmazeContainer").innerHTML = svg.solved;
+      submitted = true;
+    }
+
+    form.addEventListener(`submit`, handleSubmit);
+  </script>
+</html>

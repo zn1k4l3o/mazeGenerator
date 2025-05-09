@@ -83,11 +83,7 @@ def crop_white_space(img):
 
 def fill_middle(img):
     dirr = [(0,1), (0,-1), (1, 0), (-1, 0)]
-    #newImg = img.convert('RGB')
     imageData = np.array(img, dtype=np.uint8)
-    #imageData = img
-    newImage = Image.fromarray(imageData)
-    #newImage.show()
     height, width = imageData.shape
     print(width, height)
     pointsToVisit = [(0,0)]
@@ -98,7 +94,6 @@ def fill_middle(img):
             if not(new[0] < 0 or new[1] < 0 or new[1] >= width or new[0] >= height):
                 if (imageData[new[0], new[1]] == 255):
                     imageData[new[0], new[1]] = 69
-                    #print(new)
                     pointsToVisit.append(new)
     for i in range(height):
         for j in range(width):
@@ -136,14 +131,10 @@ def getShapeFromImage(image: ImageFile, multiplier = 0.03, threshold = 245):
     croppedImageData = crop_fixed_border(imageData, border=20)
     filledImageData = fill_middle(croppedImageData)
     finalCroppedImage = crop_white_space(filledImageData)
-    #finalCroppedImage.show()
-    #multiplier = 0.03      #how big is the target maze
-    #multiplier = 0.005  #test
     newWidth = (int) (finalCroppedImage.width*multiplier)
     newHeight= (int) (finalCroppedImage.height*multiplier)
     print(newHeight,newWidth)
     smallerImage = finalCroppedImage.resize((newWidth, newHeight))
-    #smallerImage.show()
 
     graf = np.bitwise_not(np.array(smallerImage, dtype="uint8"))
     

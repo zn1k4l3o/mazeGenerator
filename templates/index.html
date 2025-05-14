@@ -8,34 +8,52 @@
   </head>
   <body>
     <main>
-      <h1>Image to maze transform</h1>
-      <form enctype="multipart/form-data" id="imageForm">
-        <input
-          type="file"
-          name="image"
-          id="image"
-          accept="image/png, image/jpeg"
-        />
-        <br />
-        <label for="startIndex">Maze start (%):</label>
-        <input type="range" name="startIndex" min="0" max="100" />
-        <br />
-        <label for="endIndex">Maze end (%):</label>
-        <input type="range" name="endIndex" min="0" max="100" />
-        <br />
-        <label for="sizePercent">Size (%):</label>
-        <input type="range" name="sizePercent" min="1" max="100" />
-        <br />
-        <label for="cellSize">Cell size:</label>
-        <input type="range" name="cellSize" min="1" max="30" />
-        <br />
-        <label for="wallSize">Wall size:</label>
-        <input type="range" name="wallSize" min="1" max="10" />
-        <br />
-        <input type="submit" value="Submit" />
-        <br />
-        <h2>Uploaded Image:</h2>
-        <section class="result">
+      <section class="setup">
+        <div>
+          <h1>Image to maze transform</h1>
+          <form enctype="multipart/form-data" id="imageForm">
+            <input
+              type="file"
+              name="image"
+              id="image"
+              accept="image/png, image/jpeg"
+              required
+            />
+            <br />
+            <label for="startIndex">Maze start (%):</label>
+            <input type="range" name="startIndex" min="0" max="100" />
+            <br />
+            <label for="endIndex">Maze end (%):</label>
+            <input type="range" name="endIndex" min="0" max="100" />
+            <br />
+            <label for="sizePercent">Size (%):</label>
+            <input type="range" name="sizePercent" min="1" max="100" />
+            <br />
+            <label for="cellSize">Cell size:</label>
+            <input type="range" name="cellSize" min="1" max="30" />
+            <br />
+            <label for="wallSize">Wall size:</label>
+            <input type="range" name="wallSize" min="1" max="10" />
+            <br />
+            <label for="wallColor">Wall color:</label>
+            <input type="color" name="wallColor" />
+            <br />
+            <label for="solutionColor">Solution color:</label>
+            <input type="color" name="solutionColor" value="#ff0000" />
+            <br />
+            <label for="seed">Seed:</label>
+            <input type="number" name="seed" value="69" />
+            <br />
+            <input type="submit" value="Submit" id="submit" />
+            <br />
+            <h2>Uploaded Image:</h2>
+
+            <br />
+          </form>
+        </div>
+      </section>
+      <section class="result" id="result">
+        <div class="images">
           <img
             src=""
             alt="Uploaded Image"
@@ -49,18 +67,20 @@
             class="solvedmazeContainer"
             id="solvedmazeContainer"
           ></div>
-        </section>
-
-        <div>
-          <span id="loading"></span>
         </div>
-        <br />
-      </form>
+        <div class="buttons">
+          <button id="mazeDownload">Download maze</button>
+          <button id="solutionDownload">Download solution</button>
+        </div>
+      </section>
     </main>
   </body>
   <script>
     const form = document.querySelector(`#imageForm`);
     let submitted = false;
+    var svgMaze = undefined;
+    var svgSolved = undefined;
+    document.getElementById("result").style.display = "none";
 
     async function handleSubmit(event) {
       event.preventDefault();
@@ -69,16 +89,55 @@
       const imageInput = document.getElementById("image").files[0];
       document.getElementById("targetImage").src =
         URL.createObjectURL(imageInput);
+      document.getElementById("submit").disabled = true;
 
       const response = await fetch("/", { method: "POST", body: formData });
 
       const svg = await response.json();
+      document.getElementById("result").style.display = "block";
+      document.getElementById("submit").disabled = false;
 
+      svgMaze = svg.maze;
+      svgSolved = svg.solved;
       document.getElementById("mazeContainer").innerHTML = svg.maze;
       document.getElementById("solvedmazeContainer").innerHTML = svg.solved;
       submitted = true;
     }
 
+    function handleDownload(type) {
+      var maze = svgMaze;
+      if (type == "solution") {
+        maze = svgSolved;
+      }
+      console.log(type);
+      const blob = new Blob([maze], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = type === "solution" ? "maze-solution.svg" : "maze.svg";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("mazeDownload").addEventListener("click", () => {
+      handleDownload("maze");
+    });
+    document
+      .getElementById("solutionDownload")
+      .addEventListener("click", () => {
+        handleDownload("solution");
+      });
     form.addEventListener(`submit`, handleSubmit);
+    const inputs = form.querySelectorAll("input, select, textarea");
+
+    /*
+    inputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        form.requestSubmit();
+      });
+    });
+    */
   </script>
 </html>

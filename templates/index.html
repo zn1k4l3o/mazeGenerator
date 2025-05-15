@@ -8,71 +8,112 @@
   </head>
   <body>
     <main>
-      <section class="setup">
-        <div>
-          <h1>Image to maze transform</h1>
+      <div>
+        <h1>Image to maze transform</h1>
+        <section class="setup">
           <form enctype="multipart/form-data" id="imageForm">
-            <input
-              type="file"
-              name="image"
-              id="image"
-              accept="image/png, image/jpeg"
-              required
-            />
-            <br />
-            <label for="startIndex">Maze start (%):</label>
-            <input type="range" name="startIndex" min="0" max="100" />
-            <br />
-            <label for="endIndex">Maze end (%):</label>
-            <input type="range" name="endIndex" min="0" max="100" />
-            <br />
-            <label for="sizePercent">Size (%):</label>
-            <input type="range" name="sizePercent" min="1" max="100" />
-            <br />
-            <label for="cellSize">Cell size:</label>
-            <input type="range" name="cellSize" min="1" max="30" />
-            <br />
-            <label for="wallSize">Wall size:</label>
-            <input type="range" name="wallSize" min="1" max="10" />
-            <br />
-            <label for="wallColor">Wall color:</label>
-            <input type="color" name="wallColor" />
-            <br />
-            <label for="solutionColor">Solution color:</label>
-            <input type="color" name="solutionColor" value="#ff0000" />
-            <br />
-            <label for="seed">Seed:</label>
-            <input type="number" name="seed" value="69" />
-            <br />
-            <input type="submit" value="Submit" id="submit" />
-            <br />
-            <h2>Uploaded Image:</h2>
+            <table>
+              <tr>
+                <td><label for="startIndex">Maze start (%):</label></td>
+                <td>
+                  <input type="range" name="startIndex" min="0" max="100" />
+                </td>
+
+                <td><label for="cellSize">Cell size:</label></td>
+                <td><input type="range" name="cellSize" min="1" max="30" /></td>
+              </tr>
+              <tr>
+                <td><label for="endIndex">Maze end (%):</label></td>
+                <td>
+                  <input type="range" name="endIndex" min="0" max="100" />
+                </td>
+
+                <td><label for="wallSize">Wall size:</label></td>
+                <td><input type="range" name="wallSize" min="1" max="10" /></td>
+              </tr>
+              <tr>
+                <td><label for="seed">Seed:</label></td>
+                <td><input type="number" name="seed" value="69" /></td>
+
+                <td><label for="wallColor">Wall color:</label></td>
+                <td><input type="color" name="wallColor" /></td>
+              </tr>
+              <tr>
+                <td><label for="sizePercent">Size (%):</label></td>
+                <td>
+                  <input type="range" name="sizePercent" min="1" max="100" />
+                </td>
+
+                <td><label for="solutionColor">Solution color:</label></td>
+                <td>
+                  <input type="color" name="solutionColor" value="#ff0000" />
+                </td>
+              </tr>
+              <tr>
+                <td>Target image:</td>
+                <td>
+                  <input
+                    type="file"
+                    name="image"
+                    id="image"
+                    accept="image/png, image/jpeg"
+                    required
+                  />
+                </td>
+
+                <td colspan="2">
+                  <input
+                    type="submit"
+                    value="Submit"
+                    id="submit"
+                    class="disableOnSend"
+                  />
+                </td>
+              </tr>
+            </table>
 
             <br />
           </form>
-        </div>
-      </section>
-      <section class="result" id="result">
-        <div class="images">
-          <img
-            src=""
-            alt="Uploaded Image"
-            class="targetImage"
-            id="targetImage"
-          />
-          <div src="" alt="Maze" class="mazeContainer" id="mazeContainer"></div>
-          <div
-            src=""
-            alt="Solved Maze"
-            class="solvedmazeContainer"
-            id="solvedmazeContainer"
-          ></div>
-        </div>
-        <div class="buttons">
-          <button id="mazeDownload">Download maze</button>
-          <button id="solutionDownload">Download solution</button>
-        </div>
-      </section>
+        </section>
+        <section class="result" id="result">
+          <h2>Result</h2>
+          <br />
+          <div class="images">
+            <img
+              src=""
+              alt="Uploaded Image"
+              class="targetImage"
+              id="targetImage"
+            />
+            <div
+              src=""
+              alt="Maze"
+              class="mazeContainer"
+              id="mazeContainer"
+            ></div>
+            <div
+              src=""
+              alt="Solved Maze"
+              class="solvedmazeContainer"
+              id="solvedmazeContainer"
+            ></div>
+          </div>
+          <div class="buttons">
+            <button id="mazeDownload" class="disableOnSend">
+              Download maze
+            </button>
+            <button id="solutionDownload" class="disableOnSend">
+              Download solution
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <p>
+          Due to limited CPU usage mazes are limited to around 101*101 cells.
+        </p>
+      </div>
     </main>
   </body>
   <script>
@@ -89,13 +130,17 @@
       const imageInput = document.getElementById("image").files[0];
       document.getElementById("targetImage").src =
         URL.createObjectURL(imageInput);
-      document.getElementById("submit").disabled = true;
+      document
+        .querySelectorAll(".disableOnSend")
+        .forEach((el) => (el.disabled = true));
 
       const response = await fetch("/", { method: "POST", body: formData });
 
       const svg = await response.json();
       document.getElementById("result").style.display = "block";
-      document.getElementById("submit").disabled = false;
+      document
+        .querySelectorAll(".disableOnSend")
+        .forEach((el) => (el.disabled = false));
 
       svgMaze = svg.maze;
       svgSolved = svg.solved;
@@ -131,13 +176,5 @@
       });
     form.addEventListener(`submit`, handleSubmit);
     const inputs = form.querySelectorAll("input, select, textarea");
-
-    /*
-    inputs.forEach((input) => {
-      input.addEventListener("change", () => {
-        form.requestSubmit();
-      });
-    });
-    */
   </script>
 </html>

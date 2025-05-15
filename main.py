@@ -4,11 +4,7 @@ from matrixTools.mazegen import createMaze, getBorderWalls
 from matrixTools.mazesvg import mazeToSVG
 from matrixTools.mazesolve import solveBFS
 from flask import Flask, request, render_template, jsonify, send_file, Response
-from io import BytesIO
 import numpy as np
-import time
-from svg import SVG
-from copy import deepcopy
 
 app = Flask(__name__)
 
@@ -30,23 +26,7 @@ app.config["REMEMBERED_SOLUTION_COLOR"] = None
 app.config["REMEMBERED_SVG_MAZE"] = None
 app.config["REMEMBERED_SVG_SOLUTION"] = None
 
-
-def printMaze(maze):
-    for i in range(len(maze)):
-        line = maze[i]
-        out = ""
-        for ti in range(len(line)):
-            tile = maze[i, ti]
-            if tile == 69:
-                out += "X"
-            elif tile == 255:
-                out += "."
-            elif tile == 3:
-                out += "#"
-            else:
-                out += " "
-        print(out)
-
+MAX_CELL_VALUE = 130
 
 def mazeGenerator(
     image=None,
@@ -86,7 +66,6 @@ def mazeGenerator(
         imageMatrix = np.array(app.config["REMEMBERED_IMAGE_MATRIX"])
         mazeMatrix = np.array(app.config["REMEMBERED_MAZE_MATRIX"])
     else:
-        print("problem 1")
         imageMatrix, mazeMatrix = getShapeFromImage(img, sizePrct)
         app.config["REMEMBERED_IMAGE_MATRIX"] = np.array(imageMatrix)
         app.config["REMEMBERED_MAZE_MATRIX"] = np.array(mazeMatrix)
@@ -105,7 +84,6 @@ def mazeGenerator(
         maze = np.array(app.config["REMEMBERED_MAZE"])
         walls = list(app.config["REMEMBERED_WALL_POSITIONS"])
     else:
-        print("problem 2")
         maze = createMaze(mazeMatrix, dfsStart, mazeSeed)
         app.config["REMEMBERED_MAZE"] = np.array(maze)
         walls = getBorderWalls(maze)
@@ -132,28 +110,11 @@ def mazeGenerator(
         and endWallPercent == None
         and startWallPercent == None
     ):
-        print("hshshshs")
         mazeSolution = np.array(app.config["REMEMBERED_MAZE_SOLUTION"])
     else:
-        print("problem 3")
         mazeSolution = solveBFS(maze, walls[startWallIndex], walls[endWallIndex])
         app.config["REMEMBERED_MAZE_SOLUTION"] = np.array(mazeSolution)
-    # svgMaze = None
-    start = time.time()
-    """
-    if (
-        sameSolution
-        and app.config["REMEMBERED_SVG_SOLUTION"] != None
-        and app.config["REMEMBERED_SVG_MAZE"] != None
-    ):
-        if showSolution and wallColor == None and solutionColor == None:
-            svgMaze = deepcopy(app.config["REMEMBERED_SVG_SOLUTION"])
-            print("shit")
-        elif wallColor == None and not showSolution:
-            print("shit2")
-            svgMaze = deepcopy(app.config["REMEMBERED_SVG_MAZE"])
-    if svgMaze == None:
-    """
+
     svgMaze = mazeToSVG(
         mazeSolution,
         cellSize,
@@ -163,17 +124,6 @@ def mazeGenerator(
         showSolution,
     )
 
-    """
-        if showSolution:
-            app.config["REMEMBERED_SVG_SOLUTION"] = deepcopy(svgMaze)
-            print("hmmm")
-        else:
-            app.config["REMEMBERED_SVG_MAZE"] = deepcopy(svgMaze)
-            print("hmm222m")
-
-    """
-    end = time.time()
-    print("svgacija -", end - start)
     if showSolution:
         with open("mazeSolved.svg", "w") as f:
             f.write(svgMaze.as_str())
@@ -256,6 +206,16 @@ def assingValues(
     )
 
 
+def checkSize(image, sizePercent):
+    if (
+        image.size[0] * sizePercent > MAX_CELL_VALUE
+        or image.size[1] * sizePercent > MAX_CELL_VALUE
+    ):
+        newSizePercent = MAX_CELL_VALUE / max(image.size[0], image.size[1])
+        return newSizePercent
+    return sizePercent
+
+
 @app.route("/", methods=["GET", "POST"])
 def upload_image():
     if request.method == "POST":
@@ -272,10 +232,7 @@ def upload_image():
 
             image = Image.open(image.stream)
 
-            image_io = BytesIO()
-            image.save(image_io, format=image.format)
-            image_io.seek(0)
-
+            sizePercent = checkSize(image, sizePercent)
             (
                 startPercent,
                 endPercent,
@@ -297,7 +254,6 @@ def upload_image():
                 wallColor,
                 solutionColor,
             )
-            start = time.time()
             svgMaze = mazeGenerator(
                 image,
                 sizePercent,
@@ -311,12 +267,7 @@ def upload_image():
                 False,
                 seed,
             )
-            end = time.time()
-            print("1st Execution in ", (end - start))
-            start = time.time()
             svgMazeSolved = mazeGenerator(showSolution=True)
-            end = time.time()
-            print("2nd Execution in ", (end - start))
             stringMaze, stringSolvedMaze = str(svgMaze), str(svgMazeSolved)
 
             return jsonify({"maze": stringMaze, "solved": stringSolvedMaze})

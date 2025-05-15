@@ -41,7 +41,6 @@ def createMaze(graf2x1, dfsStart, seed = 1):
     while len(pointsToExplore) > 0:
         random.shuffle(dirrs2X)
         currentPos, moveY, moveX = pointsToExplore.pop()
-        #print(currentPos, moveY, moveX)
         newPos = (currentPos[0] + moveY, currentPos[1] + moveX)
 
         for addY, addX in dirrs2X:

@@ -57,12 +57,8 @@ def mazeToSVG(maze, unitSize:int, strokeWidth=1, wallStrokeColor="#000000", solu
             if (maze[y, x] == tile):
                 lineLength += 1
     
-    #print("hmm",unitSize)
-    #print("hmmmmm",sizeTrue[1])
-    #print("hmmmmmmmm",strokeWidth)
     width=(unitSize*sizeTrue[1])+(strokeWidth*2)
     height=unitSize*sizeTrue[0]+strokeWidth*2
-    #print(height, width)
     viewbox = svg.ViewBoxSpec(0, 0, width, height)
     canvas = svg.SVG(viewBox=viewbox, elements=svgElements)
     return canvas

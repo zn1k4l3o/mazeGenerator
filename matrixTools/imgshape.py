@@ -89,6 +89,7 @@ def crop_white_space(img):
 def fill_middle(img):
     dirr = [(0, 1), (0, -1), (1, 0), (-1, 0)]
     imageData = np.array(img, dtype=np.uint8)
+    imageData = np.pad(imageData, pad_width=1, mode="constant", constant_values=255)
     height, width = imageData.shape
     pointsToVisit = [(0, 0)]
     while len(pointsToVisit) > 0:
@@ -122,7 +123,6 @@ def allocate_wall_space(imageData):
 
 
 def getShapeFromImage(image: ImageFile, multiplier=0.03, threshold=245, cropAmount=10):
-    graf = np.zeros((101, 101), dtype=np.bool_)
     allWhite = Image.new("RGBA", image.size, "WHITE")
     if image.format == "PNG":
         allWhite.paste(image, (0, 0), image)

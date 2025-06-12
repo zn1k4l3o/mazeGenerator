@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+maze.svg
+mazeSolved.svg
+
 # C extensions
 *.so
 

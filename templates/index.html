@@ -14,6 +14,23 @@
           <form enctype="multipart/form-data" id="imageForm">
             <table>
               <tr>
+                <td><label for="crop">Crop amount:</label></td>
+                <td>
+                  <input type="number" name="crop" value="5" min="0" />
+                </td>
+
+                <td><label for="threshold">Grayscale threshold:</label></td>
+                <td>
+                  <input
+                    type="number"
+                    name="threshold"
+                    value="245"
+                    max="255"
+                    min="0"
+                  />
+                </td>
+              </tr>
+              <tr>
                 <td><label for="startIndex">Maze start (%):</label></td>
                 <td>
                   <input type="range" name="startIndex" min="0" max="100" />

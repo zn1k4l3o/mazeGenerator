@@ -25,8 +25,11 @@ app.config["REMEMBERED_WALL_COLOR"] = None
 app.config["REMEMBERED_SOLUTION_COLOR"] = None
 app.config["REMEMBERED_SVG_MAZE"] = None
 app.config["REMEMBERED_SVG_SOLUTION"] = None
+app.config["REMEMBERED_CROP_AMOUNT"] = None
+app.config["REMEMBERED_THRESHOLD"] = None
 
 MAX_CELL_VALUE = 130
+
 
 def mazeGenerator(
     image=None,
@@ -40,12 +43,23 @@ def mazeGenerator(
     solutionColor=None,
     showSolution=False,
     seed=None,
+    crop=None,
+    threshold=None,
 ):
-    img, sizePrct = image, sizePercentage
+    img, sizePrct, cropAmount, thresholdAmount = (
+        image,
+        sizePercentage,
+        crop,
+        threshold,
+    )
     if image == None:
         img = app.config["REMEMBERED_IMAGE"]
     if sizePercentage == None:
         sizePrct = app.config["REMEMBERED_SIZE_PERCENTAGE"]
+    if crop == None:
+        cropAmount = app.config["REMEMBERED_CROP_AMOUNT"]
+    if threshold == None:
+        thresholdAmount = app.config["REMEMBERED_THRESHOLD"]
     cellSize, wallSize = cellWidth, wallWidth
     if cellSize == None:
         cellSize = app.config["REMEMBERED_CELL_SIZE"]
@@ -62,11 +76,13 @@ def mazeGenerator(
     if solutionColor == None:
         newSolutionColor = app.config["REMEMBERED_SOLUTION_COLOR"]
     imageMatrix, mazeMatrix = None, None
-    if image == None and sizePercentage == None:
+    if image == None and sizePercentage == None and crop == None and threshold == None:
         imageMatrix = np.array(app.config["REMEMBERED_IMAGE_MATRIX"])
         mazeMatrix = np.array(app.config["REMEMBERED_MAZE_MATRIX"])
     else:
-        imageMatrix, mazeMatrix = getShapeFromImage(img, sizePrct)
+        imageMatrix, mazeMatrix = getShapeFromImage(
+            img, sizePrct, threshold=thresholdAmount, cropAmount=cropAmount
+        )
         app.config["REMEMBERED_IMAGE_MATRIX"] = np.array(imageMatrix)
         app.config["REMEMBERED_MAZE_MATRIX"] = np.array(mazeMatrix)
     addYX = [0, 0]
@@ -80,7 +96,13 @@ def mazeGenerator(
         mazeSeed = app.config["REMEMBERED_SEED"]
     maze = None
     walls = None
-    if image == None and sizePercentage == None and seed == None:
+    if (
+        image == None
+        and sizePercentage == None
+        and seed == None
+        and crop == None
+        and threshold == None
+    ):
         maze = np.array(app.config["REMEMBERED_MAZE"])
         walls = list(app.config["REMEMBERED_WALL_POSITIONS"])
     else:
@@ -109,6 +131,8 @@ def mazeGenerator(
         and seed == None
         and endWallPercent == None
         and startWallPercent == None
+        and crop == None
+        and threshold == None
     ):
         mazeSolution = np.array(app.config["REMEMBERED_MAZE_SOLUTION"])
     else:
@@ -153,6 +177,8 @@ def assingValues(
     seed,
     wallColor,
     solutionColor,
+    crop,
+    threshold,
 ):
     (
         newStartPercent,
@@ -164,7 +190,9 @@ def assingValues(
         newSeed,
         newWallColor,
         newSolutionColor,
-    ) = (None, None, None, None, None, None, None, None, None)
+        newCrop,
+        newThreshold,
+    ) = (None, None, None, None, None, None, None, None, None, None, None)
     if startPercent != app.config["REMEMBERED_START_PERCENT"]:
         newStartPercent = startPercent
         app.config["REMEMBERED_START_PERCENT"] = startPercent
@@ -192,6 +220,12 @@ def assingValues(
     if solutionColor != app.config["REMEMBERED_SOLUTION_COLOR"]:
         newSolutionColor = wallColor
         app.config["REMEMBERED_SOLUTION_COLOR"] = solutionColor
+    if crop != app.config["REMEMBERED_CROP_AMOUNT"]:
+        newCrop = crop
+        app.config["REMEMBERED_CROP_AMOUNT"] = crop
+    if threshold != app.config["REMEMBERED_THRESHOLD"]:
+        newThreshold = threshold
+        app.config["REMEMBERED_THRESHOLD"] = threshold
 
     return (
         newStartPercent,
@@ -203,6 +237,8 @@ def assingValues(
         newSeed,
         newWallColor,
         newSolutionColor,
+        newCrop,
+        newThreshold,
     )
 
 
@@ -228,6 +264,8 @@ def upload_image():
         seed = int(request.form["seed"])
         wallColor = request.form["wallColor"]
         solutionColor = request.form["solutionColor"]
+        crop = int(request.form["crop"])
+        threshold = int(request.form["threshold"])
         if image:
 
             image = Image.open(image.stream)
@@ -243,6 +281,8 @@ def upload_image():
                 seed,
                 wallColor,
                 solutionColor,
+                crop,
+                threshold,
             ) = assingValues(
                 startPercent,
                 endPercent,
@@ -253,7 +293,10 @@ def upload_image():
                 seed,
                 wallColor,
                 solutionColor,
+                crop,
+                threshold,
             )
+
             svgMaze = mazeGenerator(
                 image,
                 sizePercent,
@@ -266,6 +309,8 @@ def upload_image():
                 solutionColor,
                 False,
                 seed,
+                crop,
+                threshold,
             )
             svgMazeSolved = mazeGenerator(showSolution=True)
             stringMaze, stringSolvedMaze = str(svgMaze), str(svgMazeSolved)
@@ -276,4 +321,4 @@ def upload_image():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

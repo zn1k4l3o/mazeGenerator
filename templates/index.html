@@ -124,6 +124,10 @@
             </button>
           </div>
         </section>
+        <h3 class="error" id="error">
+          Image couldn't be processed, make sure that the image has white or
+          transparent background.
+        </h3>
       </div>
 
       <div>
@@ -135,10 +139,10 @@
   </body>
   <script>
     const form = document.querySelector(`#imageForm`);
-    let submitted = false;
     var svgMaze = undefined;
     var svgSolved = undefined;
     document.getElementById("result").style.display = "none";
+    document.getElementById("error").style.display = "none";
 
     async function handleSubmit(event) {
       event.preventDefault();
@@ -154,16 +158,19 @@
       const response = await fetch("/", { method: "POST", body: formData });
 
       const svg = await response.json();
-      document.getElementById("result").style.display = "block";
+      if (svg.state == "success") {
+        document.getElementById("result").style.display = "block";
+        svgMaze = svg.maze;
+        svgSolved = svg.solved;
+        document.getElementById("mazeContainer").innerHTML = svg.maze;
+        document.getElementById("solvedmazeContainer").innerHTML = svg.solved;
+        document.getElementById("error").style.display = "none";
+      } else {
+        document.getElementById("error").style.display = "block";
+      }
       document
         .querySelectorAll(".disableOnSend")
         .forEach((el) => (el.disabled = false));
-
-      svgMaze = svg.maze;
-      svgSolved = svg.solved;
-      document.getElementById("mazeContainer").innerHTML = svg.maze;
-      document.getElementById("solvedmazeContainer").innerHTML = svg.solved;
-      submitted = true;
     }
 
     function handleDownload(type) {
@@ -171,7 +178,6 @@
       if (type == "solution") {
         maze = svgSolved;
       }
-      console.log(type);
       const blob = new Blob([maze], { type: "image/svg+xml" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -192,6 +198,5 @@
         handleDownload("solution");
       });
     form.addEventListener(`submit`, handleSubmit);
-    const inputs = form.querySelectorAll("input, select, textarea");
   </script>
 </html>

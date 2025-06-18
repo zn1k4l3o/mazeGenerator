@@ -38,7 +38,6 @@ def getPathFromNodes(endToStartPath, start, end):
     while currentPos != start:
         currentPos = endToStartPath[currentPos]
         correctPath.append(currentPos)
-
     return correctPath
 
 

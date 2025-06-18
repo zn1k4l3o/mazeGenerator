@@ -6,6 +6,8 @@ __pycache__/
 maze.svg
 mazeSolved.svg
 
+flask_session
+
 # C extensions
 *.so
 

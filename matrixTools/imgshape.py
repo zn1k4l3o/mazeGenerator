@@ -122,6 +122,16 @@ def allocate_wall_space(imageData):
     return newData
 
 
+def checkForNonWhite(imageData):
+    newData = np.array(imageData)
+    height, width = newData.shape
+    for y in range(height):
+        for x in range(width):
+            if newData[y, x] < 255 and newData[y, x] > 0:
+                newData[y, x] = 0
+    return newData
+
+
 def getShapeFromImage(image: ImageFile, multiplier=0.03, threshold=245, cropAmount=10):
     allWhite = Image.new("RGBA", image.size, "WHITE")
     image.save("first.png")
@@ -145,9 +155,10 @@ def getShapeFromImage(image: ImageFile, multiplier=0.03, threshold=245, cropAmou
     smallerImage.save("fourth.png")
     filledImageData = fill_middle(np.asarray(smallerImage))
     Image.fromarray(filledImageData).save("fifth.png")
+    # checkedImage = checkForNonWhite(filledImageData)
+    # Image.fromarray(checkedImage).save("sixth.png")
     finalCroppedImage = crop_white_space(filledImageData)
-    finalCroppedImage.save("sixth.png")
-
+    finalCroppedImage.save("seven.png")
     graf = np.bitwise_not(np.array(finalCroppedImage, dtype="uint8"))
     graf2X1 = allocate_wall_space(graf)
 

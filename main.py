@@ -97,8 +97,8 @@ def mazeGenerator(
             walls = getBorderWalls(maze)
             session["REMEMBERED_WALL_POSITIONS"] = list(walls)
 
-        startWallIndex = int(startWallPercentValue / 100 * len(walls))
-        endWallIndex = int(endWallPercentValue / 100 * len(walls))
+        startWallIndex = int((startWallPercentValue / 100) * len(walls))
+        endWallIndex = int((endWallPercentValue / 100) * len(walls))
         if startWallIndex == len(walls):
             startWallIndex = startWallIndex % len(walls)
         if endWallIndex == len(walls):

@@ -124,6 +124,7 @@ def allocate_wall_space(imageData):
 
 def getShapeFromImage(image: ImageFile, multiplier=0.03, threshold=245, cropAmount=10):
     allWhite = Image.new("RGBA", image.size, "WHITE")
+    image.save("first.png")
     if image.format == "PNG":
         allWhite.paste(image, (0, 0), image)
     else:
@@ -131,16 +132,23 @@ def getShapeFromImage(image: ImageFile, multiplier=0.03, threshold=245, cropAmou
 
     fn = lambda x: 255 if x > threshold else 0
     convertedImage = allWhite.convert("L").point(fn, mode="L")
+    convertedImage.save("second.png")
     imageData = np.asarray(convertedImage, dtype=np.uint8)
 
     croppedImageData = crop_fixed_border(imageData, border=cropAmount)
-    filledImageData = fill_middle(croppedImageData)
-    finalCroppedImage = crop_white_space(filledImageData)
-    newWidth = (int)(finalCroppedImage.width * multiplier)
-    newHeight = (int)(finalCroppedImage.height * multiplier)
-    smallerImage = finalCroppedImage.resize((newWidth, newHeight))
+    Image.fromarray(croppedImageData).save("third.png")
+    croppedImage = Image.fromarray(croppedImageData)
 
-    graf = np.bitwise_not(np.array(smallerImage, dtype="uint8"))
+    newWidth = (int)(croppedImage.width * multiplier)
+    newHeight = (int)(croppedImage.height * multiplier)
+    smallerImage = croppedImage.resize((newWidth, newHeight))
+    smallerImage.save("fourth.png")
+    filledImageData = fill_middle(np.asarray(smallerImage))
+    Image.fromarray(filledImageData).save("fifth.png")
+    finalCroppedImage = crop_white_space(filledImageData)
+    finalCroppedImage.save("sixth.png")
+
+    graf = np.bitwise_not(np.array(finalCroppedImage, dtype="uint8"))
     graf2X1 = allocate_wall_space(graf)
 
     return (graf, graf2X1)

@@ -158,6 +158,7 @@
       const response = await fetch("/", { method: "POST", body: formData });
 
       const svg = await response.json();
+      console.log(svg);
       if (svg.state == "success") {
         document.getElementById("result").style.display = "block";
         svgMaze = svg.maze;
@@ -166,6 +167,7 @@
         document.getElementById("solvedmazeContainer").innerHTML = svg.solved;
         document.getElementById("error").style.display = "none";
       } else {
+        document.getElementById("result").style.display = "none";
         document.getElementById("error").style.display = "block";
       }
       document

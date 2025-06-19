@@ -69,8 +69,8 @@ def mazeGenerator(
     try:
         imageMatrix, mazeMatrix = None, None
         if areImageOptsSame:
-            imageMatrix = np.array(session["REMEMBERED_IMAGE_MATRIX"])
-            mazeMatrix = np.array(session["REMEMBERED_MAZE_MATRIX"])
+            imageMatrix = np.array(session.get("REMEMBERED_IMAGE_MATRIX"))
+            mazeMatrix = np.array(session.get("REMEMBERED_MAZE_MATRIX"))
         else:
             imageMatrix, mazeMatrix = getShapeFromImage(
                 img, sizePrct, threshold=thresholdAmount, cropAmount=cropAmount
@@ -85,12 +85,12 @@ def mazeGenerator(
         dfsStart = (imageMatrix.shape[0] + addYX[0], imageMatrix.shape[1] + addYX[1])
         mazeSeed = seed
         if mazeSeed == None:
-            mazeSeed = session["REMEMBERED_SEED"]
+            mazeSeed = session.get("REMEMBERED_SEED")
         maze = None
         walls = None
         if areImageOptsSame and seed == None:
-            maze = np.array(session["REMEMBERED_MAZE"])
-            walls = list(session["REMEMBERED_WALL_POSITIONS"])
+            maze = np.array(session.get("REMEMBERED_MAZE"))
+            walls = list(session.get("REMEMBERED_WALL_POSITIONS"))
         else:
             maze = createMaze(mazeMatrix, dfsStart, mazeSeed)
             session["REMEMBERED_MAZE"] = np.array(maze)
@@ -117,7 +117,7 @@ def mazeGenerator(
             and endWallPercent == None
             and startWallPercent == None
         ):
-            mazeSolution = np.array(session["REMEMBERED_MAZE_SOLUTION"])
+            mazeSolution = np.array(session.get("REMEMBERED_MAZE_SOLUTION"))
         else:
             mazeSolution = solveBFS(maze, walls[startWallIndex], walls[endWallIndex])
             session["REMEMBERED_MAZE_SOLUTION"] = np.array(mazeSolution)
@@ -133,6 +133,17 @@ def mazeGenerator(
 
         return svgMaze
     except:
+        session["REMEMBERED_START_PERCENT"] = None
+        session["REMEMBERED_END_PERCENT"] = None
+        session["REMEMBERED_SIZE_PERCENTAGE"] = None
+        session["REMEMBERED_CELL_SIZE"] = None
+        session["REMEMBERED_WALL_SIZE"] = None
+        session["REMEMBERED_IMAGE"] = None
+        session["REMEMBERED_SEED"] = None
+        session["REMEMBERED_WALL_COLOR"] = None
+        session["REMEMBERED_SOLUTION_COLOR"] = None
+        session["REMEMBERED_CROP_AMOUNT"] = None
+        session["REMEMBERED_THRESHOLD"] = None
         return None
 
 
@@ -161,41 +172,65 @@ def assingValues(
 ):
     remembered = session
 
+    (
+        startPercentNew,
+        endPercentNew,
+        sizePercentNew,
+        cellSizeNew,
+        wallSizeNew,
+        imageNew,
+        seedNew,
+        wallColorNew,
+        solutionColorNew,
+        cropNew,
+        thresholdNew,
+    ) = (None, None, None, None, None, None, None, None, None, None, None)
     if startPercent != remembered.get("REMEMBERED_START_PERCENT"):
         session["REMEMBERED_START_PERCENT"] = startPercent
+        startPercentNew = startPercent
     if endPercent != remembered.get("REMEMBERED_END_PERCENT"):
         session["REMEMBERED_END_PERCENT"] = endPercent
+        endPercentNew = endPercent
     if sizePercent != remembered.get("REMEMBERED_SIZE_PERCENTAGE"):
         session["REMEMBERED_SIZE_PERCENTAGE"] = sizePercent
+        sizePercentNew = sizePercent
     if cellSize != remembered.get("REMEMBERED_CELL_SIZE"):
         session["REMEMBERED_CELL_SIZE"] = cellSize
+        cellSizeNew = cellSize
     if wallSize != remembered.get("REMEMBERED_WALL_SIZE"):
         session["REMEMBERED_WALL_SIZE"] = wallSize
+        wallSizeNew = wallSize
     if not imagesAreEqual(image, remembered.get("REMEMBERED_IMAGE")):
         session["REMEMBERED_IMAGE"] = image
+        imageNew = image
     if seed != remembered.get("REMEMBERED_SEED"):
         session["REMEMBERED_SEED"] = seed
+        seedNew = seed
     if wallColor != remembered.get("REMEMBERED_WALL_COLOR"):
         session["REMEMBERED_WALL_COLOR"] = wallColor
+        wallColorNew = wallColor
     if solutionColor != remembered.get("REMEMBERED_SOLUTION_COLOR"):
         session["REMEMBERED_SOLUTION_COLOR"] = solutionColor
+        solutionColorNew = solutionColor
     if crop != remembered.get("REMEMBERED_CROP_AMOUNT"):
         session["REMEMBERED_CROP_AMOUNT"] = crop
+        cropNew = crop
     if threshold != remembered.get("REMEMBERED_THRESHOLD"):
         session["REMEMBERED_THRESHOLD"] = threshold
+        thresholdNew = threshold
 
     return (
-        startPercent,
-        endPercent,
-        sizePercent,
-        cellSize,
-        wallSize,
-        image,
-        seed,
-        wallColor,
-        solutionColor,
-        crop,
-        threshold,
+        startPercentNew,
+        endPercentNew,
+        sizePercentNew,
+        cellSizeNew,
+        wallSizeNew,
+        imageNew,
+        seedNew,
+        wallColorNew,
+        solutionColorNew,
+        cropNew,
+        thresholdNew,
     )
 
 

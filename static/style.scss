@@ -24,6 +24,7 @@ main {
 
     form {
       padding: 20px 0 10px 0;
+
       table {
         width: 100%;
         max-width: 800px;
@@ -97,6 +98,11 @@ main {
         height: 60px;
       }
     }
+  }
+
+  .error {
+    margin: 0 auto;
+    color: red;
   }
 
   div {

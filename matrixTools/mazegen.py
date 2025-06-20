@@ -67,9 +67,7 @@ def checkIsPathWall(tempPoint, wallLocations, maze):
 
 
 def getBorderWalls(maze):
-    mazeWidth = maze.shape[1]
-    wallLocations = []
-    addX = 0
+    mazeWidth, wallLocations, addX = maze.shape[1], [], 0
     if int((mazeWidth - 1) / 2) % 2 == 0:
         addX = 1
     firstWallY = 0
@@ -91,17 +89,15 @@ def getBorderWalls(maze):
                 checkIsPathWall(tempPoint, wallLocations, maze)
                 and maze[midPoint[0], midPoint[1]] == WALL
             ):
-                currentPoint = tempPoint
+                currentPoint, pointAdded = tempPoint, True
                 wallLocations.append(tempPoint)
-                pointAdded = True
                 break
         if not pointAdded:
             for add in dirrDiag:
                 tempPoint = (currentPoint[0] + add[0], currentPoint[1] + add[1])
                 if checkIsPathWall(tempPoint, wallLocations, maze):
-                    currentPoint = tempPoint
+                    currentPoint, pointAdded = tempPoint, True
                     wallLocations.append(tempPoint)
-                    pointAdded = True
                     break
         if not pointAdded:
             break
